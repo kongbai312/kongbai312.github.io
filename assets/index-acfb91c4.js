@@ -1,0 +1,1 @@
+import{aD as s,G as a,j as t,e as o}from"./index-9f26c53c.js";const n=["","default","small","large"],i={large:40,default:32,small:24},c=s({type:String,values:n,required:!1}),r=Symbol("size"),u=()=>{const e=a(r,{});return t(()=>o(e.size)||"")};export{r as S,n as a,u as b,i as c,c as u};
