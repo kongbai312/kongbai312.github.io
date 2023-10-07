@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>love3D</title>
+    <style type="text/css">
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            background-color: #cc3299;
+        }
+        #stage{
+            width: 650px;
+            height: 240px;
+            margin: 100px auto;
+            position: relative;
+        }
+        .biaobai{
+            margin:0 auto;
+            text-align:center
+        }
+        .box{
+            float: left;
+            width:  160px;
+            height: 240px;
+            margin-right: -2.5px;
+            position:relative;
+            -webkit-transform-style: preserve-3d;
+            -moz-transform-style: preserve-3d;
+            -ms-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            transition: 1.5s;
+        }
+        .box:hover{
+            transform:rotateY(180deg);
+        }
+        .face{
+            width:160px;
+            height:240px;
+            position: absolute;
+        }
+        .front{
+            border:2px solid #F00;
+        }
+        .back{
+            -webkit-transform-style: preserve-3d;
+            -moz-transform-style: preserve-3d;
+            -ms-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            transform:rotateY(180deg);
+            background-color: white;
+            border:2px solid #CC3299;
+        }
+        .back h1{
+            color:#FF1cae;
+            text-align: center;
+            line-height: 240px;
+        }
+        #times{
+            display: block;
+            width: 500px;
+            position: absolute;
+            left: 50%;
+            top:50%;
+            transform: translate(-190px,137px);
+            font-size: 30px;
+
+
+
+        }
+        .fontzi{
+            display: block;
+            width: 500px;
+            position: absolute;
+            left: 50%;
+            top:50%;
+            transform: translate(-143px,171px);
+            font-size: 30px;
+
+
+
+        }
+    </style>
+</head>
+<body>
+<div id="stage">
+    <div class="box">
+        <div class="face front">
+            <img src="img1/1.jpg" ></img>
+        </div>
+        <div class="face back">
+            <h1>七</h1>
+        </div>
+    </div>
+    <div class="box">
+        <div class="face front">
+            <img src="img1/2.jpg" ></img>
+        </div>
+        <div class="face back">
+            <h1>夕</h1>
+        </div>
+    </div>
+    <div class="box">
+        <div class="face front">
+            <img src="img1/3.jpg" ></img>
+        </div>
+        <div class="face back">
+            <h1>快</h1>
+        </div>
+    </div>
+    <div class="box">
+        <div class="face front">
+            <img src="img1/4.jpg" id="imgfour"></img>
+        </div>
+        <div class="face back">
+            <h1>乐</h1>
+        </div>
+    </div>
+    <span id="times"></span>
+    <span class="fontzi">愿接下来也一起度过</span>
+</div>
+
+<script type="text/javascript">
+    function creattime(){
+        let begintime = new Date('7/14/2021 11:04:00');
+        let nowtime = Date.now();
+        let togethertime = nowtime-begintime;
+        let togetherday=togethertime/1000/60/60/24;
+        let togethersecond=Math.floor(togethertime/1000);
+        document.getElementById("times").innerHTML='与你共同经历了'+togethersecond+'秒';
+    }
+    //setInterval() 方法可按照指定的周期(以毫秒计)来调用函数或计算表达式
+    setInterval("creattime()",1000);
+	
+	
+</script>
+</body>
+</html>

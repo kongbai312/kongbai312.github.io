@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>贪吃蛇</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        /*设置游戏的盒子样式*/
+        #game {
+            width: 340px;
+            height: 400px;
+            border: 10px solid black;
+            /*设置圆角*/
+            border-radius: 10%;
+            /*设置居中*/
+            margin: 100px auto;
+            background-color: #b7d4a8;
+            /*设置弹性容器*/
+            display: flex;
+            /*设置主轴方向*/
+            flex-flow: column;
+            /*设置侧轴的对齐方式*/
+            align-items: center;
+            /*设置主轴的对齐方式*/
+            justify-content: space-around;
+
+
+        }
+
+        /*设置stage*/
+        #stage {
+            width: 300px;
+            height: 300px;
+            /*设置边框*/
+            border: 2px solid #000;
+            /*开启相对定位*/
+            position: relative;
+        }
+
+        /*设置蛇的样式*/
+        #snake > div {
+            /*怪异盒子模型开启*/
+            box-sizing: border-box;
+            width: 10px;
+            height: 10px;
+            background-color: black;
+            /*开启绝对定位，便于修改偏移量*/
+            position: absolute;
+            /*设置边框*/
+            border: 1px solid #b7d4a8;
+            /*设置圆角*/
+            border-radius: 3px;
+        }
+
+
+        /*设置蛇的食物*/
+        #food {
+            /*怪异盒子模型开启*/
+            box-sizing: border-box;
+            width: 10px;
+            height: 10px;
+            /*border: 1px solid #b7d4a8;*/
+            /*开启绝对定位，便于修改偏移量*/
+            position: absolute;
+            left: 20px;
+            top: 30px;
+            border: 1px solid #b7d4a8;
+        }
+
+        /*设置食物的造型*/
+        #food > div {
+            width: 50%;
+            height: 50%;
+            background-color: #000;
+            float: left;
+            /*使四个div旋转45度*/
+            transform: rotate(45deg);
+            border-radius: 2px;
+        }
+
+        /*设置分数盒子*/
+        #score-level {
+            width: 300px;
+            /*字体大小*/
+            font-size: 20px;
+            /*字体*/
+            font-family: Courier;
+            /*字体加粗*/
+            font-weight: 700;
+            /*开启弹性盒子*/
+            display: flex;
+            /*元素包围盒子*/
+            justify-content: space-between;
+        }
+
+        /*按钮样式*/
+        #remake{
+            width: 60px;
+            height: 50px;
+            position: absolute;
+            left: 50%;
+            transform: translate(-30px,-170px);
+        }
+    </style>
+</head>
+<body>
+<div id="game">
+    <div id="stage">
+        <div id="snake">
+            <div></div>
+        </div><!--      snake结束-->
+        <div id="food">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div><!--      food结束-->
+    </div> <!--      stage结束-->
+
+    <div id="score-level">
+        <div id="score">
+            SCORE:<span>0</span>
+        </div><!--      score结束-->
+
+        <div id="level">
+            LEVEL:<span>1</span>
+        </div>
+
+    </div><!--      score-level结束-->
+
+</div>
+<button id="remake">重新开始</button>
+<script type="text/javascript">
+    /*
+    *
+    * 1.随机生成食物的位置
+    *   - 偏移量必须是10的倍数
+    *   -  0 - 290
+    * 2.使蛇头移动
+    * 3.检查蛇有没有吃到食物
+    *       吃到食物蛇发生的变化
+    *       食物的位置发生变化
+    *       游戏的计分
+    * 4.蛇的身体如何移动
+    * 5.判定游戏失败
+    *      1.撞墙
+    *      2.撞自己
+    * 6.如何避免蛇调头
+    * */
+    (function () {
+        //获取食物
+        let food = document.getElementById('food');
+        //获取蛇的容器
+        let snake = document.getElementById('snake');
+        //获取所有蛇的身体 snakebody[0]蛇头
+        let snakeBody = snake.getElementsByTagName('div');
+        // 创建一个变量存储蛇的移动方向
+        // 若设置的值不为null则游戏一上来就直接开始
+        let dir = null;
+        //创建两个变量用来存储score和level
+        let score = 0,level =1;
+        //获取两个元素
+        let scoreSpan = document.getElementById('score').getElementsByTagName('span')[0];
+        let levelSpan = document.getElementById('level').getElementsByTagName('span')[0];
+
+        //随机生成食物
+        function makeFood() {
+            //改变食物的坐标
+            let top = Math.round(Math.random() * 29) * 10;
+            let left = Math.round(Math.random() * 29) * 10;
+
+            // 改变食物的位置
+            food.style.left = left + 'px';
+            food.style.top = top + 'px';
+        }
+        //修改初始位置
+        // makeFood();
+
+        //按下案件时，获取键盘方向
+        document.addEventListener('keydown',function (event){
+            //将所有的合法值放入一个数组中
+            let keyArr = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Up','Down','Left','Right'];
+            //修改蛇的移动方向
+            //是合法的值，才修改
+            if(keyArr.indexOf(event.key)!=-1){
+                dir = event.key;
+            }
+        });
+
+
+        //设置蛇的移动
+        //开启定期器控制蛇的移动
+        setTimeout(function main(){
+            //定义两个变量存储蛇头当前位置
+            let left = snakeBody[0].offsetLeft;
+            let top = snakeBody[0].offsetTop;
+
+            //根据dir的值控制蛇移动,只计算值，后面单独修改
+            switch (dir) {
+                case 'Up':
+                case 'ArrowUp':
+                    //向上移动
+                    top -=10;
+                    //判断是否调头
+                    //即新位置是否与旧位置相同
+                    if(snakeBody[1] && top===snakeBody[1].offsetTop){
+                        top +=20;
+                    }
+                    break;
+                case 'Down':
+                case 'ArrowDown':
+                    //向下移动
+                    top +=10;
+                    //判断是否调头
+                    //即新位置是否与旧位置相同
+                    if(snakeBody[1] && top===snakeBody[1].offsetTop){
+                        top -=20;
+                    }
+                    break;
+                case 'Left':
+                case 'ArrowLeft':
+                    //向左移动
+                    left -=10;
+                    //判断是否调头
+                    //即新位置是否与旧位置相同
+                    if(snakeBody[1] && left===snakeBody[1].offsetLeft){
+                        left +=20;
+                    }
+                    break;
+                case 'Right':
+                case 'ArrowRight':
+                    // 向右移动
+                    left +=10;
+                    //判断是否调头
+                    //即新位置是否与旧位置相同
+                    if(snakeBody[1] && left===snakeBody[1].offsetLeft){
+                        left -=20;
+                    }
+                    break;
+            }
+
+            //检查蛇是否撞墙
+            if(left <0 || left >290 || top<0 || top>290){
+                alert('不会吧，不会吧，不会有人玩贪吃蛇都能撞墙吧？！Remake吧');
+                //停止游戏
+                return;
+            }
+
+            //检测蛇是否吃到食物
+            // 即判断蛇头坐标与食物坐标是否相同
+
+            if(left===food.offsetLeft && top===food.offsetTop){
+                //修改食物的位置
+                makeFood();
+
+                //增加蛇的身体
+                //创建一个新的div
+                let newbody = document.createElement('div');
+                //将div添加到snake中
+                snake.appendChild(newbody);
+                // 从蛇头增加
+                // snake.insertAdjacentElement('afterbegin',newbody);
+
+                //分数增加,并写入
+                score++
+                scoreSpan.innerHTML = score;
+
+                //判断等级,小于10级吃三个升级
+                if(level<30 && score /3 === level){
+                    level++;
+                    // 显示新等级
+                    levelSpan.innerHTML = level;
+                }
+
+            }
+
+            /*
+            *   设置蛇的移动：
+            *       当前身子的位置，等于它前边的身子的位置
+            *       第三节的位置 = 第二节的位置
+            *       第二节的位置 = 头的位置
+            *       头的位置 = top left
+            * */
+            for(let i=snakeBody.length-1; i>0 ; i--){
+                //snakeBody[i]后面的身体
+                //snakeBody[i-1]前面的身体
+                let bodyleft = snakeBody[i-1].offsetLeft;
+                let bodytop = snakeBody[i-1].offsetTop;
+
+                //检查头是否和身体相撞
+                if(bodyleft ===left && bodytop === top){
+                    alert('不会吧，这也能撞。Remake');
+                    return;
+                }
+
+                snakeBody[i].style.left = bodyleft+'px';
+                snakeBody[i].style.top = bodytop +'px';
+            }
+
+             //修改蛇头的位置
+            snakeBody[0].style.left = left +'px';
+            snakeBody[0].style.top = top +'px';
+
+            //重复调用达到循环效果（setInterval)
+            //并且升级
+            setTimeout(main,110-(2*(level-1)));
+        },110);
+
+        //重新开始按钮 获取按钮位置
+        let remake = document.getElementById('remake');
+        remake.addEventListener('click',function (event){
+            event.preventDefault();
+            window.location= '';
+        });
+
+
+    })();
+</script>
+</body>
+</html>
